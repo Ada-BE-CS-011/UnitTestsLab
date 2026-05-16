@@ -2,7 +2,7 @@ namespace OrdersApi.Bad.Domain.Entities;
 
 public class Order
 {
-    public int Id { get; set; }
+    public int Id { get; set; }     
     public List<OrderItem> Items { get; set; } = new();
     public decimal Subtotal { get; set; }
     public decimal Discount { get; set; }

@@ -1,27 +1,37 @@
+using Microsoft.EntityFrameworkCore;
 using OrdersApi.Bad.Domain.Entities;
+using OrdersApi.Bad.Infrastructure.Database;
 
 namespace OrdersApi.Bad.Infrastructure.Repositories;
 
 public class OrderRepository
 {
-    private static readonly List<Order> _orders = new();
-    private static int _nextId = 1;
+    private readonly AppDbContext context;
+
+    public OrderRepository(AppDbContext context)
+    {
+        this.context = context;
+    }
 
     public Order Add(Order order)
     {
-        order.Id = _nextId;
-        _nextId++;
-        _orders.Add(order);
+        context.Orders.Add(order);
+        context.SaveChanges();
+
         return order;
     }
 
     public Order? GetById(int id)
     {
-        return _orders.FirstOrDefault(x => x.Id == id);
+        return context.Orders
+            .Include(o => o.Items)
+            .FirstOrDefault(x => x.Id == id);
     }
 
-    public List<Order> GetAll()
+    public IEnumerable<Order> GetAll()
     {
-        return _orders;
+        return context.Orders
+            .Include(o => o.Items)
+            .AsNoTracking();
     }
 }

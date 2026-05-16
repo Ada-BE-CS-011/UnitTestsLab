@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc;
 using OrdersApi.Bad.Domain.Entities;
 using OrdersApi.Bad.Dtos;
-using OrdersApi.Bad.Infrastructure.Repositories;
+using OrdersApi.Bad.Infrastructure.Database;
 using OrdersApi.Bad.Infrastructure.Gateways;
+using OrdersApi.Bad.Infrastructure.Repositories;
 
 namespace OrdersApi.Bad.Controllers;
 
@@ -11,23 +11,33 @@ namespace OrdersApi.Bad.Controllers;
 [Route("api/orders")]
 public class OrdersController : ControllerBase
 {
+    private readonly AppDbContext dbContext;
+
+    public OrdersController(AppDbContext dbContext)
+    {
+        this.dbContext = dbContext;
+    }
+
     [HttpPost]
     public IActionResult Create(CreateOrderRequest request)
     {
-        var productRepository = new ProductRepository();
-        var orderRepository = new OrderRepository();
+        var productRepository = new ProductRepository(dbContext);
+        var orderRepository = new OrderRepository(dbContext);
         var paymentGateway = new PaymentGateway();
 
+        // OK - Se os dados a order for nula, retorna BadRequest
         if (request == null)
         {
             return BadRequest("request is null");
         }
 
+        // OK - Se a order não tiver itens, retorna badrequest
         if (request.Items == null || request.Items.Count == 0)
         {
             return BadRequest("pedido precisa de item");
         }
 
+        // Status Inicial da Order é Pending
         var order = new Order();
         order.Status = "Pending";
         order.CreatedAt = DateTime.Now;
@@ -39,11 +49,13 @@ public class OrdersController : ControllerBase
         {
             var incoming = request.Items[i];
 
+            // Quantidade de Items é Inválida
             if (incoming.Quantity <= 0)
             {
                 return BadRequest("qty invalida");
             }
 
+            // Produto não Existe
             var product = productRepository.GetById(incoming.ProductId);
             if (product == null)
             {
@@ -118,7 +130,7 @@ public class OrdersController : ControllerBase
     [HttpGet("{id:int}")]
     public IActionResult GetById(int id)
     {
-        var orderRepository = new OrderRepository();
+        var orderRepository = new OrderRepository(dbContext);
         var order = orderRepository.GetById(id);
         if (order == null)
         {
@@ -131,7 +143,7 @@ public class OrdersController : ControllerBase
     [HttpGet]
     public IActionResult GetAll()
     {
-        var orderRepository = new OrderRepository();
+        var orderRepository = new OrderRepository(dbContext);
         var orders = orderRepository.GetAll();
         return Ok(orders);
     }
