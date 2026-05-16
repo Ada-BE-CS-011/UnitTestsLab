@@ -1,6 +1,8 @@
+using OrdersApi.Bad.Domain.Interfaces;
+
 namespace OrdersApi.Bad.Infrastructure.Gateways;
 
-public class PaymentGateway
+public class PaymentGateway : IPaymentGateway
 {
     public bool Pay(decimal total)
     {

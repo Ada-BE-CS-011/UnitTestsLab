@@ -1,6 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using OrdersApi.Bad.Application.Services;
 using OrdersApi.Bad.Domain.Entities;
+using OrdersApi.Bad.Domain.Interfaces;
 using OrdersApi.Bad.Infrastructure.Database;
+using OrdersApi.Bad.Infrastructure.Gateways;
+using OrdersApi.Bad.Infrastructure.Repositories;
 
 namespace OrdersApi.Bad;
 
@@ -16,6 +20,11 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddDbContext<AppDbContext>(options => options.UseInMemoryDatabase("OrdersDatabase"));
+        builder.Services.AddScoped<IOrderService, OrderService>();
+        builder.Services.AddScoped<IProductRepository, ProductRepository>();
+        builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+        builder.Services.AddScoped<IPaymentGateway, PaymentGateway>();
+
 
         var app = builder.Build();
         await SeedDatabaseAsync(app); // Add await here to properly use async

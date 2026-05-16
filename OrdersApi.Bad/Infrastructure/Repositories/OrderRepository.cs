@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using OrdersApi.Bad.Domain.Entities;
+using OrdersApi.Bad.Domain.Interfaces;
 using OrdersApi.Bad.Infrastructure.Database;
 
 namespace OrdersApi.Bad.Infrastructure.Repositories;
 
-public class OrderRepository
+public class OrderRepository : IOrderRepository
 {
     private readonly AppDbContext context;
 
